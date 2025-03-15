@@ -9,9 +9,8 @@ class Allocator:
     def __init__(self, client_id):
         self.artist = db['artist']
         self.client = db['client']
-        self.client_id = client_id  # Additional attribute to store client id for business service
+        self.client_id = client_id
+        self.rag_pipeline = RAG_Pipeline(clientId=self.client_id)  # Reuse instance
 
     def get_best_matches(self):
-        rp = RAG_Pipeline(clientId=self.client_id)
-        # print(rp.get_response().split(', '))
-        return rp.get_response()
+        return self.rag_pipeline.get_response()

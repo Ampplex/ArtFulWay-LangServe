@@ -12,6 +12,7 @@ from langchain.chains import create_retrieval_chain
 from langchain_google_genai import ChatGoogleGenerativeAI
 import os
 import re
+import weakref
 
 class ArtistIDOutputParser(BaseOutputParser[List[str]]):
     def parse(self, text: str) -> List[str]:
@@ -27,7 +28,10 @@ class ArtistIDOutputParser(BaseOutputParser[List[str]]):
         return ids  # Return whatever is available
 
 class RAG_Pipeline:
+    _instances = weakref.WeakSet()
+    
     def __init__(self, clientId):
+        self.__class__._instances.add(self)
         os.environ["TOKENIZERS_PARALLELISM"] = "false"
         self.client_id = clientId
         
@@ -101,9 +105,13 @@ class RAG_Pipeline:
     def get_response(self) -> List[str]:
         self.create_vectorstore()
         retrieval_chain = self.createDocRetrievalChain()
-        
+
         print("🔍 Client Doc Passed to LLM:", self.client_doc)
-        
+
         response = retrieval_chain.invoke({"input": self.client_doc})
-        
+
+        # Clean up vector DB to free memory
+        del self.vector_db
+        self.vector_db = None
+
         return response['answer']
