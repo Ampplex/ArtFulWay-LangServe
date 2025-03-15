@@ -16,7 +16,7 @@ import weakref
 
 class ArtistIDOutputParser(BaseOutputParser[List[str]]):
     def parse(self, text: str) -> List[str]:
-        print("🔍 Raw LLM Response:", text)  # Debugging print statement
+        # print("🔍 Raw LLM Response:", text)  # Debugging print statement
 
         # Allow single ID or comma-separated multiple IDs
         pattern = r'67[a-z0-9]{22}'  # Pattern for MongoDB ObjectIDs
@@ -96,8 +96,8 @@ class RAG_Pipeline:
         retriever = self.vector_db.as_retriever()
 
         # 🔍 Print retrieved documents before passing to LLM
-        retrieved_docs = retriever.get_relevant_documents(self.client_doc)
-        print("🔍 Retrieved Documents for LLM:", retrieved_docs)
+        # retrieved_docs = retriever.get_relevant_documents(self.client_doc)
+        # print("🔍 Retrieved Documents for LLM:", retrieved_docs)
 
         retrieval_chain = create_retrieval_chain(retriever, document_chain)
         return retrieval_chain
@@ -105,8 +105,6 @@ class RAG_Pipeline:
     def get_response(self) -> List[str]:
         self.create_vectorstore()
         retrieval_chain = self.createDocRetrievalChain()
-
-        print("🔍 Client Doc Passed to LLM:", self.client_doc)
 
         response = retrieval_chain.invoke({"input": self.client_doc})
 
