@@ -10,9 +10,13 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain.chains import create_retrieval_chain
 from langchain_google_genai import ChatGoogleGenerativeAI
-import os
 import re
 import weakref
+import os
+
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"  # Prevents CUDA usage
+os.environ["TF_ENABLE_ONEDNN_OPTS"] = "0"  # Disables TensorFlow optimizations
 
 class ArtistIDOutputParser(BaseOutputParser[List[str]]):
     def parse(self, text: str) -> List[str]:
@@ -44,9 +48,10 @@ class RAG_Pipeline:
             self.client_doc = str(client_info)
             
         self.embeddings = HuggingFaceEmbeddings(
-            model_name="sentence-transformers/all-mpnet-base-v2",
-            model_kwargs={"device": "cpu"}  # Force CPU usage
+            model_name="sentence-transformers/all-MiniLM-L6-v2",  # Smaller, ~100MB RAM
+            model_kwargs={"device": "cpu"}
         )
+        
         self.llm = ChatGoogleGenerativeAI(
             model="gemini-1.5-flash",
             temperature=0,
@@ -86,7 +91,11 @@ class RAG_Pipeline:
             chunk_overlap=200
         )
         self.docs = text_splitter.split_documents(self.docs) 
-        self.vector_db = Chroma.from_documents(self.docs, self.embeddings)
+        self.vector_db = Chroma.from_documents(
+            self.docs, 
+            self.embeddings,
+            persist_directory="./chroma_db"  # Store vectors persistently to reduce RAM usage
+        )
 
     def createDocRetrievalChain(self):
         document_chain = create_stuff_documents_chain(

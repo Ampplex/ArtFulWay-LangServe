@@ -3,9 +3,6 @@ from flask import Flask, request, jsonify
 from allocator import Allocator
 import os
 
-# os.environ["CUDA_VISIBLE_DEVICES"] = "-1"  # Disable GPU
-# os.environ["TF_ENABLE_ONEDNN_OPTS"] = "0"  # Avoid GPU-related optimizations
-
 app = Flask(__name__)
 
 @app.route("/match-artists", methods=["GET"])
