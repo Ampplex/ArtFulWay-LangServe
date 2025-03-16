@@ -44,7 +44,8 @@ class RAG_Pipeline:
             self.client_doc = str(client_info)
             
         self.embeddings = HuggingFaceEmbeddings(
-            model_name="sentence-transformers/all-mpnet-base-v2"
+            model_name="sentence-transformers/all-mpnet-base-v2",
+            model_kwargs={"device": "cpu"}  # Force CPU usage
         )
         self.llm = ChatGoogleGenerativeAI(
             model="gemini-1.5-flash",

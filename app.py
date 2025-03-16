@@ -3,6 +3,9 @@ from flask import Flask, request, jsonify
 from allocator import Allocator
 import os
 
+# os.environ["CUDA_VISIBLE_DEVICES"] = "-1"  # Disable GPU
+# os.environ["TF_ENABLE_ONEDNN_OPTS"] = "0"  # Avoid GPU-related optimizations
+
 app = Flask(__name__)
 
 @app.route("/match-artists", methods=["GET"])
@@ -14,6 +17,10 @@ def match_artists():
     allocator = Allocator(client_id)
     matches = allocator.get_best_matches()
     return jsonify({"artist_ids": matches})
+
+@app.route("/", methods=["GET"])
+def home():
+    return jsonify({"message": "Welcome to the Artist Matching API!"})
 
 @app.route("/test-match-artists", methods=["POST"])
 def test_match_artists():
