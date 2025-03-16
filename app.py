@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 from flask import Flask, request, jsonify
 from allocator import Allocator
+import os
 
 app = Flask(__name__)
 
@@ -21,4 +22,4 @@ def test_match_artists():
     return jsonify({"message": "Success", "received_client_id": data.get("client_id")})
 
 if __name__ == "__main__":
-    app.run(host="localhost", port=8000, debug=True)
+    app.run(debug=True)
