@@ -1,29 +1,18 @@
 #!/usr/bin/env python
-from flask import Flask, request, jsonify
-from allocator import Allocator
-import os
+import json
+from infrastructure.compute.allocator import Allocator
 
-app = Flask(__name__)
-
-@app.route("/match-artists", methods=["GET"])
-def match_artists():
-    client_id = request.args.get("client_id")
+def match_artists_handler():
+    client_id = "67bab8b3d8b4179c417669b4"
     if not client_id:
-        return jsonify({"error": "client_id is required"}), 400
+        return json.dumps({"error": "client_id is required"}), 400
     
     allocator = Allocator(client_id)
     matches = allocator.get_best_matches()
-    return jsonify({"artist_ids": matches})
+    
+    return json.dumps({"artist_ids": matches})
 
-@app.route("/", methods=["GET"])
-def home():
-    return jsonify({"message": "Welcome to the Artist Matching API!"})
-
-@app.route("/test-match-artists", methods=["POST"])
-def test_match_artists():
-    data = request.json
-    print("Received data:", data)
-    return jsonify({"message": "Success", "received_client_id": data.get("client_id")})
-
+# Call function
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 8000)), debug=True)
+    result = match_artists_handler()
+    print(result)  # Print output as JSON
