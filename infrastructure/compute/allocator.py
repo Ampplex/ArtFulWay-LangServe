@@ -1,4 +1,4 @@
-from connection import db
+from infrastructure.compute.connection import db
 from bson import ObjectId
 from dotenv import load_dotenv
 from rag_pipeline import RAG_Pipeline
