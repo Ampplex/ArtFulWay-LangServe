@@ -90,9 +90,22 @@ class RAG_Pipeline:
             chunk_size=1500,
             chunk_overlap=200
         )
-        self.docs = text_splitter.split_documents(self.docs) 
+        self.docs = text_splitter.split_documents(self.docs)
+        
+        # Filter out documents with empty embeddings
+        valid_docs = []
+        for doc in self.docs:
+            embedding = self.embeddings.embed_query(doc.page_content)
+            if embedding:
+                valid_docs.append(doc)
+            else:
+                print(f"⚠️ Skipping document due to empty embedding: {doc.page_content}")
+        
+        if not valid_docs:
+            raise ValueError("No valid documents with embeddings found. Check document content or embedding model.")
+        
         self.vector_db = Chroma.from_documents(
-            self.docs, 
+            valid_docs, 
             self.embeddings,
             persist_directory="./chroma_db"  # Store vectors persistently to reduce RAM usage
         )
@@ -106,8 +119,8 @@ class RAG_Pipeline:
         retriever = self.vector_db.as_retriever()
 
         # 🔍 Print retrieved documents before passing to LLM
-        # retrieved_docs = retriever.get_relevant_documents(self.client_doc)
-        # print("🔍 Retrieved Documents for LLM:", retrieved_docs)
+        retrieved_docs = retriever.get_relevant_documents(self.client_doc)
+        print("🔍 Retrieved Documents for LLM:", retrieved_docs)
 
         retrieval_chain = create_retrieval_chain(retriever, document_chain)
         return retrieval_chain
