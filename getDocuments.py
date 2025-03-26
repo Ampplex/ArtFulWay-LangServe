@@ -14,7 +14,7 @@ class GetDocuments:
         """Fetches available artists from MongoDB and returns them as structured documents."""
         available_users = self.artist.find({"isAvailable": True})
 
-        # print("available artists: ", available_users)
+        print("available artists: ", self.artist)
 
         # Convert MongoDB data into structured documents
         documents = [
@@ -34,7 +34,7 @@ class GetDocuments:
             )
             for user in available_users
         ]
-
+        print("Look here: ", documents)
         return documents
     
     def get_clientInfo(self) -> List[Document]:
@@ -73,4 +73,5 @@ class GetDocuments:
             )
             client_documents.append(document)
 
+        print("client documents: ", client_documents)
         return client_documents
