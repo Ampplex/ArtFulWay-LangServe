@@ -25,22 +25,29 @@ class ArtistIDOutputParser(BaseOutputParser[List[str]]):
         # Allow single ID or comma-separated multiple IDs
         pattern = r'67[a-z0-9]{22}'  # Pattern for MongoDB ObjectIDs
         ids = re.findall(pattern, text)
+        
+        # Remove duplicates while preserving order
+        unique_ids = []
+        for id in ids:
+            if id not in unique_ids:
+                unique_ids.append(id)
 
-        if not ids:
+        if not unique_ids:
             print("⚠️ No artist IDs found in LLM response!")
 
-        return ids  # Return whatever is available
+        return unique_ids  # Return unique IDs only
 
 class RAG_Pipeline:
     _instances = weakref.WeakSet()
     
-    def __init__(self, clientId):
+    def __init__(self, clientId, project_id):
         self.__class__._instances.add(self)
         os.environ["TOKENIZERS_PARALLELISM"] = "false"
         self.client_id = clientId
+        self.project_id = project_id
         
         self.docs = GetDocuments(self.client_id).get_available_artists()
-        client_info = GetDocuments(self.client_id).get_clientInfo()
+        client_info = GetDocuments(self.client_id).get_clientInfo(project_id)
         
         if isinstance(client_info, list):
             self.client_doc = " ".join(str(item) for item in client_info)
@@ -53,7 +60,7 @@ class RAG_Pipeline:
         )
         
         self.llm = ChatGoogleGenerativeAI(
-            model="gemini-1.5-flash",
+            model="gemini-2.0-flash",
             temperature=0,
             max_tokens=300,
             timeout=None,
@@ -62,25 +69,33 @@ class RAG_Pipeline:
         self.vector_db = None
         self.output_parser = ArtistIDOutputParser()
         
+        # Update your prompt in the __init__ method
         self.prompt = ChatPromptTemplate.from_template("""
-            System: You are a matching system that ONLY outputs artist IDs. 
-            If there are no matching artists, output an empty response. 
+            System: You are a matching system that MUST output a minimum of 2 matching artist IDs and has no maximum limit.
+            If exactly matching artists aren't found, relax the criteria to find the closest matches.
+            Never return fewer than 2 artist IDs unless the available artists list is completely empty.
 
             Human: Match artists with these requirements:
             Client Requirements: {input}
             Available Artists: {context}
 
-            Criteria:
+            Matching priority:
+            1. First try with exact matches on all criteria:
             - Experience level exact match
             - Score exact match
             - Skills and Work title alignment
+            
+            2. If fewer than 2 matches are found, relax criteria in this order:
+            - Allow partial skills/title matches
+            - Allow similar (not exact) experience levels
+            - Allow scores within a reasonable range
+            
+            3. IMPORTANT: Always return at least 2 artist IDs unless there are zero artists available.
 
-            **Output the available artist IDs, separated by commas. If no matching artists are found, return an empty response.**
+            **Output the artist IDs, separated by commas. You MUST return at least 2 IDs.**
 
             Example Output:
-            67a1234567890abcdef1234,67a234567890abcdef12345
-            or
-            (empty response)
+            67a1234567890abcdef1234,67a234567890abcdef12345,67a3456789abcdef123456
 
             Assistant:
         """)
@@ -120,7 +135,7 @@ class RAG_Pipeline:
 
         # 🔍 Print retrieved documents before passing to LLM
         retrieved_docs = retriever.get_relevant_documents(self.client_doc)
-        print("🔍 Retrieved Documents for LLM:", retrieved_docs)
+        # print("🔍 Retrieved Documents for LLM:", retrieved_docs)
 
         retrieval_chain = create_retrieval_chain(retriever, document_chain)
         return retrieval_chain

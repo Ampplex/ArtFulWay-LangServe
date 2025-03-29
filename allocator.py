@@ -6,11 +6,12 @@ from rag_pipeline import RAG_Pipeline
 load_dotenv(verbose=True)
 
 class Allocator:
-    def __init__(self, client_id):
+    def __init__(self, client_id, project_id):
         self.artist = db['artist']
         self.client = db['client']
         self.client_id = client_id
-        self.rag_pipeline = RAG_Pipeline(clientId=self.client_id)  # Reuse instance
+        self.project_id = project_id
+        self.rag_pipeline = RAG_Pipeline(clientId=self.client_id, project_id=self.project_id)  # Reuse instance
 
     def get_best_matches(self):
         print("🔍 Searching for best matches...")
