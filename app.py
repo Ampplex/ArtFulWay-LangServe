@@ -6,7 +6,8 @@ app = Flask(__name__)
 # Configure CORS to allow all origins during development
 CORS(app, resources={r"/*": {"origins": ["http://localhost:5173", "http://localhost:8080"]}})
 
-@app.route('/match_artists', methods=['GET'])
+# Route to handle artist matching
+@app.route('/match_artists', methods=['GET']) 
 def match_artists_handler():
     client_id = request.args.get('client_id')
     project_id = request.args.get('project_id')
