@@ -14,7 +14,7 @@ class GetDocuments:
         """Fetches available artists from MongoDB and returns them as structured documents."""
         available_users = self.artist.find({"isAvailable": True})
 
-        print("available artists: ", self.artist)
+        # print("available artists: ", self.artist)
 
         # Convert MongoDB data into structured documents
         documents = [
@@ -34,10 +34,10 @@ class GetDocuments:
             )
             for user in available_users
         ]
-        print("Look here: ", documents)
+        # print("Look here: ", documents)
         return documents
     
-    def get_clientInfo(self) -> List[Document]:
+    def get_clientInfo(self, project_id: str) -> List[Document]:
         """Fetches client project details from MongoDB and returns them as structured documents."""
         client_documents = []
 
@@ -47,8 +47,7 @@ class GetDocuments:
             print(f"Invalid client_id: {self.client_id} - {e}")
             return []
 
-        project_data = self.projects.find_one({"client_id": client_obj_id, "_id": ObjectId("67d44c68216b280c5f7bb854")})  # Find project using dynamic client_id
-
+        project_data = self.projects.find_one({"client_id": client_obj_id, "_id": ObjectId(project_id)})  # Find project using dynamic client_id
 
         if project_data:
             document = Document(
@@ -73,5 +72,5 @@ class GetDocuments:
             )
             client_documents.append(document)
 
-        print("client documents: ", client_documents)
+        # print("client documents: ", client_documents)
         return client_documents
