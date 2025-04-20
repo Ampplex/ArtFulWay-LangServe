@@ -12,29 +12,35 @@ class GetDocuments:
 
     def get_available_artists(self) -> List[Document]:
         """Fetches available artists from MongoDB and returns them as structured documents."""
-        available_users = self.artist.find({"isAvailable": True})
-
-        # print("available artists: ", self.artist)
-
+        # Use MongoDB aggregation to get distinct artists
+        pipeline = [
+            {"$match": {"isAvailable": True}},
+            {"$group": {"_id": "$_id", "doc": {"$first": "$$ROOT"}}}
+        ]
+        available_users = list(self.artist.aggregate(pipeline))
+        
+        print(f"Found {len(available_users)} available unique artists in database")
+        
         # Convert MongoDB data into structured documents
         documents = [
             Document(
-                page_content=f"""Artist Name: {user.get('artist_name', 'N/A')}
-                Work Title: {user.get('work_title', 'N/A')}
-                Experience: {user.get('experience', 'N/A')}
-                Description: {user.get('description', 'N/A')}
-                Score: {user.get('score', 'N/A')}
+                page_content=f"""Artist Name: {user['doc'].get('artist_name', 'N/A')}
+                Work Title: {user['doc'].get('work_title', 'N/A')}
+                Experience: {user['doc'].get('experience', 'N/A')}
+                Description: {user['doc'].get('description', 'N/A')}
+                Score: {user['doc'].get('score', 'N/A')}
                 Artist ID: {str(user['_id'])}""",
                 metadata={
-                    "isAvailable": user.get("isAvailable", False),
-                    "work_title": user.get("work_title", "N/A"),
-                    "experience": user.get("experience", "N/A"),
-                    "score": user.get("score", "N/A")
+                    "artist_id": str(user['_id']),  # Add artist_id to metadata
+                    "isAvailable": user['doc'].get("isAvailable", False),
+                    "work_title": user['doc'].get("work_title", "N/A"),
+                    "experience": user['doc'].get("experience", "N/A"),
+                    "score": user['doc'].get("score", "N/A")
                 }
             )
             for user in available_users
         ]
-        # print("Look here: ", documents)
+        
         return documents
     
     def get_clientInfo(self, project_id: str) -> List[Document]:
