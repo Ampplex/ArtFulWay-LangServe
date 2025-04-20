@@ -13,6 +13,7 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 import re
 import weakref
 import os
+from connection import db
 
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"  # Prevents CUDA usage
@@ -20,7 +21,7 @@ os.environ["TF_ENABLE_ONEDNN_OPTS"] = "0"  # Disables TensorFlow optimizations
 
 class ArtistIDOutputParser(BaseOutputParser[List[str]]):
     def parse(self, text: str) -> List[str]:
-        # print("🔍 Raw LLM Response:", text)  # Debugging print statement
+        print("\n🔍 Raw LLM Response:", text)  # Debugging print statement
 
         # Allow single ID or comma-separated multiple IDs
         pattern = r'67[a-z0-9]{22}'  # Pattern for MongoDB ObjectIDs
@@ -32,9 +33,12 @@ class ArtistIDOutputParser(BaseOutputParser[List[str]]):
             if id not in unique_ids:
                 unique_ids.append(id)
 
+        print(f"📝 Found {len(unique_ids)} unique artist IDs")
+        print(f"🎨 Artist IDs: {unique_ids}")
+
         if not unique_ids:
             print("⚠️ No artist IDs found in LLM response!")
-
+        
         return unique_ids  # Return unique IDs only
 
 class RAG_Pipeline:
@@ -55,99 +59,51 @@ class RAG_Pipeline:
             self.client_doc = str(client_info)
             
         self.embeddings = HuggingFaceEmbeddings(
-            model_name="sentence-transformers/all-MiniLM-L6-v2",  # Smaller, ~100MB RAM
+            model_name="sentence-transformers/all-MiniLM-L6-v2",
             model_kwargs={"device": "cpu"}
         )
         
         self.llm = ChatGoogleGenerativeAI(
             model="gemini-2.0-flash",
-            temperature=0,
-            max_tokens=300,
+            temperature=0.3,  # Slightly increase temperature from 0
+            max_tokens=500,
             timeout=None,
             max_retries=2,
         )
+
         self.vector_db = None
         self.output_parser = ArtistIDOutputParser()
         
-        # Update your prompt in the __init__ method
         self.prompt = ChatPromptTemplate.from_template("""
-            System: You are a matching system that MUST output a minimum of 2 matching artist IDs and has no maximum limit.
-            If exactly matching artists aren't found, relax the criteria to find the closest matches.
-            Never return fewer than 2 artist IDs unless the available artists list is completely empty.
-
+            System: You are a matching system that MUST return ALL suitable employeees.
+            Your task is to identify EVERY employees that could potentially work on this project.
+            It is CRITICAL that you do not exclude any potentially suitable employee.
+            
             Human: Match artists with these requirements:
             Client Requirements: {input}
-            Available Artists: {context}
-
-            Matching priority:
-            1. First try with exact matches on all criteria:
-            - Experience level exact match
-            - Score exact match
-            - Skills and Work title alignment
+            Available employees: {context}
             
-            2. If fewer than 2 matches are found, relax criteria in this order:
-            - Allow partial skills/title matches
-            - Allow similar (not exact) experience levels
-            - Allow scores within a reasonable range
-            
-            3. IMPORTANT: Always return at least 2 artist IDs unless there are zero artists available.
-
-            **Output the artist IDs, separated by commas. You MUST return at least 2 IDs.**
-
-            Example Output:
-            67a1234567890abcdef1234,67a234567890abcdef12345,67a3456789abcdef123456
-
-            Assistant:
+            Review all the employees and if matches with the client requirements and partially skills then return its details
+            in the format:
+            **Format: Only artist_id separated by commas**
         """)
 
     def create_vectorstore(self):
-        text_splitter = RecursiveCharacterTextSplitter(
-            chunk_size=1500,
-            chunk_overlap=200
-        )
-        self.docs = text_splitter.split_documents(self.docs)
-        
-        # Filter out documents with empty embeddings
-        valid_docs = []
-        for doc in self.docs:
-            embedding = self.embeddings.embed_query(doc.page_content)
-            if embedding:
-                valid_docs.append(doc)
-            else:
-                print(f"⚠️ Skipping document due to empty embedding: {doc.page_content}")
-        
-        if not valid_docs:
-            raise ValueError("No valid documents with embeddings found. Check document content or embedding model.")
-        
-        self.vector_db = Chroma.from_documents(
-            valid_docs, 
-            self.embeddings,
-            persist_directory="./chroma_db"  # Store vectors persistently to reduce RAM usage
-        )
+            text_splitter = RecursiveCharacterTextSplitter(
+                chunk_size=1500,
+                chunk_overlap=200
+            )
+            self.docs = text_splitter.split_documents(self.docs)
+            self.vector_db = Chroma.from_documents(self.docs, self.embeddings)
 
     def createDocRetrievalChain(self):
-        document_chain = create_stuff_documents_chain(
-            self.llm, 
-            self.prompt,
-            output_parser=self.output_parser
-        )
+        document_chain = create_stuff_documents_chain(self.llm, self.prompt)
         retriever = self.vector_db.as_retriever()
-
-        # 🔍 Print retrieved documents before passing to LLM
-        retrieved_docs = retriever.get_relevant_documents(self.client_doc)
-        # print("🔍 Retrieved Documents for LLM:", retrieved_docs)
-
         retrieval_chain = create_retrieval_chain(retriever, document_chain)
         return retrieval_chain
 
-    def get_response(self) -> List[str]:
+    def get_response(self):
         self.create_vectorstore()
         retrieval_chain = self.createDocRetrievalChain()
-
         response = retrieval_chain.invoke({"input": self.client_doc})
-
-        # Clean up vector DB to free memory
-        del self.vector_db
-        self.vector_db = None
-
         return response['answer']

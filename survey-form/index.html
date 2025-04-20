@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ArtfulWay Creative Survey</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #3c0963;
+            --primary-light: #5c1a93;
+            --secondary: #f84393;
+            --secondary-light: #ff7aa2;
+            --text: #ffffff;
+            --text-muted: rgba(255, 255, 255, 0.7);
+            --background: #210037;
+            --card-bg: rgba(33, 6, 55, 0.7);
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            --error: #ff4d4d;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--background) 0%, var(--primary) 50%, var(--primary-light) 100%);
+            padding: 20px;
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+        }
+
+        @keyframes gradientShift {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        .form-container {
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            width: 100%;
+            max-width: 600px;
+            transform: translateY(0);
+            opacity: 1;
+            transition: all 0.4s ease;
+            color: var(--text);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .form-container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .progress-steps {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .step {
+            width: 22%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+            position: relative;
+        }
+
+        .step.active {
+            background: linear-gradient(to right, var(--secondary), var(--secondary-light));
+        }
+
+        .step::after {
+            content: '';
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            top: -4px;
+            right: -6px;
+        }
+
+        .step.active::after {
+            background: var(--secondary);
+            border-color: var(--secondary);
+            box-shadow: 0 0 10px var(--secondary-light);
+        }
+
+        h1 {
+            color: var(--text);
+            margin-bottom: 25px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .subtitle {
+            text-align: center;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+
+        .gift-icon {
+            display: inline-block;
+            margin-right: 5px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeIn 0.6s forwards;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        label {
+            display: block;
+            margin-bottom: 12px;
+            color: var(--text);
+            font-weight: 500;
+        }
+
+        input,
+        textarea,
+        select {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(4px);
+        }
+
+        input:focus,
+        textarea:focus,
+        select:focus {
+            border-color: var(--secondary);
+            box-shadow: 0 0 0 2px var(--secondary-light);
+            outline: none;
+        }
+
+        input::placeholder,
+        textarea::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .radio-group,
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .radio-label,
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(4px);
+        }
+
+        .radio-label:hover,
+        .checkbox-label:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--secondary-light);
+        }
+
+        .radio-label input,
+        .checkbox-label input {
+            width: auto;
+            margin-right: 10px;
+        }
+
+        button {
+            background: linear-gradient(to right, var(--secondary), var(--secondary-light));
+            color: white;
+            padding: 14px 30px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: block;
+            width: 100%;
+            margin-top: 30px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(248, 67, 147, 0.3);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .back-button {
+            background: rgba(255, 255, 255, 0.1);
+            flex: 1;
+        }
+
+        .next-button,
+        .submit-button {
+            background: linear-gradient(to right, var(--secondary), var(--secondary-light));
+            flex: 3;
+        }
+
+        .privacy-policy {
+            display: flex;
+            align-items: center;
+            margin-top: 20px;
+            font-size: 0.9em;
+        }
+
+        .privacy-policy input {
+            width: auto;
+            margin-right: 10px;
+        }
+
+        .privacy-policy a {
+            color: var(--secondary);
+            text-decoration: none;
+        }
+
+        /* Animation for sections */
+        .section {
+            display: none;
+            animation: fadeSection 0.5s forwards;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        @keyframes fadeSection {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .form-container {
+                padding: 25px;
+            }
+
+            button {
+                padding: 12px 20px;
+            }
+        }
+
+        .error-message {
+            color: var(--error);
+            font-size: 0.85em;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .form-group.error input,
+        .form-group.error textarea,
+        .form-group.error select,
+        .form-group.error .radio-group,
+        .form-group.error .checkbox-group {
+            border-color: var(--error);
+            box-shadow: 0 0 0 2px rgba(255, 77, 77, 0.2);
+        }
+
+        .form-group.error .error-message {
+            display: block;
+        }
+
+        /* Loading Animation */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(33, 6, 55, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(8px);
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--secondary);
+            animation: spin 1s ease-in-out infinite;
+            margin-bottom: 20px;
+        }
+
+        .loading-text {
+            color: var(--text);
+            font-size: 1.2em;
+            margin-top: 20px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Success Page Styles */
+        .success-container {
+            text-align: center;
+            padding: 40px;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .success-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+            color: var(--secondary);
+            animation: bounce 1s ease infinite;
+        }
+
+        .success-title {
+            color: var(--secondary);
+            margin-bottom: 20px;
+            font-size: 2em;
+        }
+
+        .success-message {
+            color: var(--text);
+            margin: 20px 0;
+            line-height: 1.6;
+        }
+
+        .visit-link {
+            display: inline-block;
+            margin-top: 30px;
+            padding: 12px 30px;
+            background: linear-gradient(to right, var(--secondary), var(--secondary-light));
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .visit-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(248, 67, 147, 0.3);
+        }
+
+        @keyframes bounce {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <form class="form-container" id="creativeForm" method="POST">
+        <!-- Hidden fields for Google Forms -->
+        <input type="hidden" name="fvv" value="1">
+        <input type="hidden" name="pageHistory" value="0">
+        <input type="hidden" name="fbzx" value="YOUR_FORM_ID">
+
+        <!-- Progress Steps -->
+        <div class="progress-steps">
+            <div class="step active" data-step="1"></div>
+            <div class="step" data-step="2"></div>
+            <div class="step" data-step="3"></div>
+            <div class="step" data-step="4"></div>
+        </div>
+
+        <!-- Welcome Section -->
+        <section class="section active" id="section1">
+            <h1>Your Creativity Is Valuable – Let ArtfulWay Reward It!</h1>
+            <p class="subtitle">
+                <span class="gift-icon">🎁</span> Get a chance to win ₹5,000+ in exciting prizes!<br>
+                Complete our short survey-cum-quiz crafted exclusively for creative minds.
+                Your genuine responses could win you rewards like headphones, smartwatches, gift cards, and more.
+            </p>
+
+            <div class="form-group">
+                <label for="name">What's your name? *</label>
+                <input type="text" id="name" name="entry.1234567890" placeholder="Full Name" required>
+                <div class="error-message"></div>
+            </div>
+
+            <div class="form-group">
+                <label>What's your gender? *</label>
+                <div class="radio-group">
+                    <label class="radio-label">
+                        <input type="radio" name="entry.1111111111" value="Male" required>
+                        Male
+                    </label>
+                    <label class="radio-label">
+                        <input type="radio" name="entry.1111111111" value="Female">
+                        Female
+                    </label>
+                    <label class="radio-label">
+                        <input type="radio" name="entry.1111111111" value="Prefer not to answer">
+                        Prefer not to answer
+                    </label>
+                </div>
+                <div class="error-message"></div>
+            </div>
+
+            <div class="form-group">
+                <label>What is your age range? *</label>
+                <div class="radio-group">
+                    <label class="radio-label">
+                        <input type="radio" name="entry.2222222222" value="16-24" required>
+                        16-24
+                    </label>
+                    <label class="radio-label">
+                        <input type="radio" name="entry.2222222222" value="25-34">
+                        25-34
+                    </label>
+                    <label class="radio-label">
+                        <input type="radio" name="entry.2222222222" value="35-49">
+                        35-49
+                    </label>
+                    <label class="radio-label">
+                        <input type="radio" name="entry.2222222222" value="50+">
+                        50+
+                    </label>
+                </div>
+                <div class="error-message"></div>
+            </div>
+
+            <div class="button-group">
+                <button type="button" class="next-button" onclick="nextSection(1)">Continue</button>
+            </div>
+        </section>
+
+        <!-- Creative Areas Section -->
+        <section class="section" id="section2">
+            <h1>Creative Fields</h1>
+
+            <div class="form-group">
+                <label>Which areas of creative work do you actively pursue or want to explore further? *</label>
+                <div class="checkbox-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="entry.3333333333" value="Graphic Design & Branding">
+                        Graphic Design & Branding
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="entry.3333333333" value="Content Writing & Copywriting">
+                        Content Writing & Copywriting
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="entry.3333333333" value="Digital Marketing & SEO">
+                        Digital Marketing & SEO
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="entry.3333333333" value="Video Editing & Animation">
+                        Video Editing & Animation
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="entry.3333333333" value="UI/UX or Product Design">
+                        UI/UX or Product Design
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="entry.3333333333" value="Other">
+                        Other (specify below)
+                    </label>
+                </div>
+                <div class="error-message"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="otherCreative">If other, please specify:</label>
+                <input type="text" id="otherCreative" name="entry.4444444444" placeholder="Your answer">
+                <div class="error-message"></div>
+            </div>
+
+            <div class="button-group">
+                <button type="button" class="back-button" onclick="prevSection(2)">Back</button>
+                <button type="button" class="next-button" onclick="nextSection(2)">Continue</button>
+            </div>
+        </section>
+
+        <!-- Work Habits Section -->
+        <section class="section" id="section3">
+            <h1>Your Work Process</h1>
+
+            <div class="form-group">
+                <label>How do you usually find new projects or clients? *</label>
+                <div class="radio-group">
+                    <label class="radio-label">
+                        <input type="radio" name="entry.5555555555" value="Social Media" required>
+                        Through social media (Instagram, LinkedIn, etc.)
+                    </label>
+                    <label class="radio-label">
+                        <input type="radio" name="entry.5555555555" value="Freelance Platforms">
+                        Freelance platforms (Fiverr, Upwork, etc.)
+                    </label>
+                    <label class="radio-label">
+                        <input type="radio" name="entry.5555555555" value="Personal Network">
+                        Personal network or referrals
+                    </label>
+                    <label class="radio-label">
+                        <input type="radio" name="entry.5555555555" value="Cold Outreach">
+                        Cold outreach / self-promotion
+                    </label>
+                    <label class="radio-label">
+                        <input type="radio" name="entry.5555555555" value="No Projects Yet">
+                        I don't usually get projects yet
+                    </label>
+                </div>
+                <div class="error-message"></div>
+            </div>
+
+            <div class="form-group">
+                <label>What tools or technologies do you regularly use in your creative work? *</label>
+                <div class="checkbox-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="entry.6666666666" value="Adobe Creative Suite">
+                        Adobe Creative Suite (Photoshop, Illustrator, etc.)
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="entry.6666666666" value="Canva/Figma/Sketch">
+                        Canva / Figma / Sketch
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="entry.6666666666" value="Google Docs/Word/SEO Tools">
+                        Google Docs / Word / SEO Tools
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="entry.6666666666" value="Video Editing Software">
+                        Premiere Pro / After Effects / DaVinci
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="entry.6666666666" value="AI Tools">
+                        AI tools (like ChatGPT, Midjourney, etc.)
+                    </label>
+                </div>
+                <div class="error-message"></div>
+            </div>
+
+            <div class="button-group">
+                <button type="button" class="back-button" onclick="prevSection(3)">Back</button>
+                <button type="button" class="next-button" onclick="nextSection(3)">Continue</button>
+            </div>
+        </section>
+
+        <!-- Final Section -->
+        <section class="section" id="section4">
+            <h1>Almost Done!</h1>
+
+            <div class="form-group">
+                <label for="aiTool">What kind of AI-based product or tool do you wish existed to support your creative
+                    journey? *</label>
+                <textarea id="aiTool" name="entry.7777777777" rows="3" required placeholder="Your answer"></textarea>
+                <div class="error-message"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="standOut">What makes you stand out as a creative person in your field? *</label>
+                <textarea id="standOut" name="entry.8888888888" rows="3" required placeholder="Your answer"></textarea>
+                <div class="error-message"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="email">What's your email? *</label>
+                <input type="email" id="email" name="entry.9999999999" placeholder="Ex. username@email.com" required>
+                <div class="error-message"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="phone">What's your phone number? *</label>
+                <input type="tel" id="phone" name="entry.1010101010" placeholder="Ex.: 55-389217" required>
+                <div class="error-message"></div>
+            </div>
+
+            <div class="form-group">
+                <div class="privacy-policy">
+                    <input type="checkbox" id="privacy" required>
+                    <label for="privacy">I have read and accept the <a href="#">privacy policy</a>. *</label>
+                </div>
+                <div class="error-message"></div>
+            </div>
+
+            <div class="button-group">
+                <button type="button" class="back-button" onclick="prevSection(4)">Back</button>
+                <button type="submit" class="submit-button">Submit</button>
+            </div>
+        </section>
+    </form>
+
+    <script>
+        // Enhanced form validation
+        function validateField(field) {
+            const formGroup = field.closest('.form-group');
+            if (!formGroup) return true; // Safety check
+
+            const errorMessage = formGroup.querySelector('.error-message');
+            if (!errorMessage) return true; // Safety check
+
+            if (field.type === 'radio') {
+                const radioGroup = field.closest('.radio-group');
+                if (!radioGroup) return true; // Safety check
+
+                const radioName = field.name;
+                const checked = document.querySelector(`input[name="${radioName}"]:checked`);
+                if (!checked) {
+                    formGroup.classList.add('error');
+                    errorMessage.textContent = 'Please select an option';
+                    return false;
+                }
+            } else if (field.type === 'checkbox' && field.id === 'privacy') {
+                if (!field.checked) {
+                    formGroup.classList.add('error');
+                    errorMessage.textContent = 'Please accept the privacy policy';
+                    return false;
+                }
+            } else if (field.type !== 'checkbox' && !field.value.trim()) {
+                formGroup.classList.add('error');
+                errorMessage.textContent = 'This field is required';
+                return false;
+            }
+
+            formGroup.classList.remove('error');
+            return true;
+        }
+
+        function nextSection(currentSection) {
+            const section = document.getElementById(`section${currentSection}`);
+            if (!section) return; // Safety check
+
+            const requiredFields = section.querySelectorAll('[required]');
+            let valid = true;
+
+            requiredFields.forEach(field => {
+                if (!validateField(field)) {
+                    valid = false;
+                }
+            });
+
+            if (!valid) {
+                return false;
+            }
+
+            // If checkbox is required for section 2
+            if (currentSection === 2) {
+                const checkboxes = document.querySelectorAll('input[name="entry.3333333333"]');
+                let checked = false;
+                checkboxes.forEach(checkbox => {
+                    if (checkbox.checked) checked = true;
+                });
+
+                if (!checked) {
+                    const formGroup = checkboxes[0].closest('.form-group');
+                    if (formGroup) {
+                        formGroup.classList.add('error');
+                        const errorMessage = formGroup.querySelector('.error-message');
+                        if (errorMessage) {
+                            errorMessage.textContent = 'Please select at least one option';
+                        }
+                    }
+                    return false;
+                }
+            }
+
+            // Hide current section
+            document.getElementById(`section${currentSection}`).classList.remove('active');
+
+            // Show next section
+            const nextSection = document.getElementById(`section${currentSection + 1}`);
+            if (nextSection) {
+                nextSection.classList.add('active');
+            }
+
+            // Update progress steps
+            const currentStep = document.querySelector(`.step[data-step="${currentSection}"]`);
+            const nextStep = document.querySelector(`.step[data-step="${currentSection + 1}"]`);
+
+            if (currentStep) {
+                currentStep.classList.add('completed');
+            }
+
+            if (nextStep) {
+                nextStep.classList.add('active');
+            }
+
+            // Scroll to top of form
+            const formContainer = document.querySelector('.form-container');
+            if (formContainer) {
+                formContainer.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        function prevSection(currentSection) {
+            // Hide current section
+            const currentSectionEl = document.getElementById(`section${currentSection}`);
+            if (currentSectionEl) {
+                currentSectionEl.classList.remove('active');
+            }
+
+            // Show previous section
+            const prevSectionEl = document.getElementById(`section${currentSection - 1}`);
+            if (prevSectionEl) {
+                prevSectionEl.classList.add('active');
+            }
+
+            // Update progress steps
+            const currentStep = document.querySelector(`.step[data-step="${currentSection}"]`);
+            if (currentStep) {
+                currentStep.classList.remove('active');
+            }
+
+            // Scroll to top of form
+            const formContainer = document.querySelector('.form-container');
+            if (formContainer) {
+                formContainer.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        // Reset validation on input
+        document.querySelectorAll('input, textarea, select').forEach(input => {
+            input.addEventListener('input', () => {
+                const formGroup = input.closest('.form-group');
+                if (formGroup) {
+                    formGroup.classList.remove('error');
+                }
+            });
+        });
+
+        // Form submission handling
+        const form = document.getElementById('creativeForm');
+        if (form) {
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                const requiredFields = document.querySelectorAll('[required]');
+                let valid = true;
+
+                requiredFields.forEach(field => {
+                    if (!validateField(field)) {
+                        valid = false;
+                    }
+                });
+
+                if (!valid) {
+                    alert('Please fill in all required fields correctly');
+                    return;
+                }
+
+                // Show loading overlay
+                const loadingOverlay = document.createElement('div');
+                loadingOverlay.className = 'loading-overlay';
+                loadingOverlay.innerHTML = `
+                    <div class="loading-spinner"></div>
+                    <div class="loading-text">Submitting your response...</div>
+                `;
+                document.body.appendChild(loadingOverlay);
+
+                // Check for checkbox fields
+                const checkboxFields = ['entry.3333333333', 'entry.6666666666'];
+                checkboxFields.forEach(fieldName => {
+                    const checkboxes = document.querySelectorAll(`input[name="${fieldName}"]:checked`);
+                    if (checkboxes.length === 0) {
+                        const checkbox = document.querySelector(`input[name="${fieldName}"]`);
+                        if (checkbox) {
+                            const formGroup = checkbox.closest('.form-group');
+                            if (formGroup) {
+                                const errorMessage = formGroup.querySelector('.error-message');
+                                if (errorMessage) {
+                                    formGroup.classList.add('error');
+                                    errorMessage.textContent = 'Please select at least one option';
+                                    valid = false;
+                                }
+                            }
+                        }
+                    }
+                });
+
+                if (!valid) {
+                    document.body.removeChild(loadingOverlay);
+                    return;
+                }
+
+                // Collect form data
+                const formData = {
+                    name: document.getElementById('name')?.value || '',
+                    gender: document.querySelector('input[name="entry.1111111111"]:checked')?.value || '',
+                    age: document.querySelector('input[name="entry.2222222222"]:checked')?.value || '',
+                    creativeAreas: Array.from(document.querySelectorAll('input[name="entry.3333333333"]:checked'))
+                        .map(cb => cb.value),
+                    otherCreative: document.getElementById('otherCreative')?.value || '',
+                    projectFinding: document.querySelector('input[name="entry.5555555555"]:checked')?.value || '',
+                    tools: Array.from(document.querySelectorAll('input[name="entry.6666666666"]:checked'))
+                        .map(cb => cb.value),
+                    aiTool: document.getElementById('aiTool')?.value || '',
+                    standOut: document.getElementById('standOut')?.value || '',
+                    email: document.getElementById('email')?.value || '',
+                    phone: document.getElementById('phone')?.value || ''
+                };
+
+                // Submit to Google Apps Script using no-cors mode
+                const url = "https://script.google.com/macros/s/AKfycbyTQw9bsGfhHug5MRh6CqdoraRzgXl6tCQvd7JO2WK-AD4Q-x__SmQcEDfmmtzmFKztPQ/exec"
+                fetch(url, {
+                    method: 'POST',
+                    mode: 'no-cors', // Add this line
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                })
+                    .then(response => {
+                        // Since we're using no-cors, we can't actually check response status
+                        // Just assume it worked
+                        document.body.removeChild(loadingOverlay);
+
+                        // Show success message
+                        const formContainer = document.querySelector('.form-container');
+                        if (formContainer) {
+                            formContainer.innerHTML = `
+            <div class="success-container">
+                <div class="success-icon">🎉</div>
+                <h1 class="success-title">Thank You!</h1>
+                <p class="success-message">
+                    Your response has been successfully submitted. We'll review your entry and contact you if you're selected as one of our lucky winners!
+                </p>
+                <p class="success-message">
+                    While you wait, check out ArtfulWay's creative resources and upcoming events.
+                </p>
+                <a href="#" class="visit-link">Visit ArtfulWay</a>
+            </div>
+        `;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        document.body.removeChild(loadingOverlay);
+                        alert('There was an error submitting your form. Please try again later.');
+                    });
+            });
+        }
+
+        // Initialize form field listeners
+        document.addEventListener('DOMContentLoaded', function () {
+            // Add input event listeners to remove error state when user types
+            document.querySelectorAll('input, textarea, select').forEach(element => {
+                element.addEventListener('input', function () {
+                    const formGroup = this.closest('.form-group');
+                    if (formGroup) {
+                        formGroup.classList.remove('error');
+                    }
+                });
+            });
+
+            // Add change event listeners for radio and checkbox groups
+            document.querySelectorAll('input[type="radio"], input[type="checkbox"]').forEach(element => {
+                element.addEventListener('change', function () {
+                    const formGroup = this.closest('.form-group');
+                    if (formGroup) {
+                        formGroup.classList.remove('error');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>

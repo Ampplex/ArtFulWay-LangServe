@@ -20,7 +20,7 @@ def match_artists_handler():
         matches = allocator.get_best_matches()
         print("Matches found:", matches)
 
-        return jsonify({"artist_ids": matches})
+        return jsonify({"artist_ids": matches.split(",")}), 200
     except Exception as e:
         # Catch any potential errors from the Allocator
         return jsonify({"error": str(e)}), 500
