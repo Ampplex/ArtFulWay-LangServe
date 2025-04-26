@@ -3,7 +3,7 @@ from langchain.schema import BaseOutputParser
 from getDocuments import GetDocuments
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_huggingface import HuggingFaceEmbeddings
-from langchain_community.vectorstores import Chroma
+from langchain_community.vectorstores import Chroma, FAISS
 from langchain_ollama import OllamaLLM
 from dotenv import load_dotenv
 from langchain_core.prompts import ChatPromptTemplate
@@ -94,7 +94,7 @@ class RAG_Pipeline:
                 chunk_overlap=200
             )
             self.docs = text_splitter.split_documents(self.docs)
-            self.vector_db = Chroma.from_documents(self.docs, self.embeddings)
+            self.vector_db = FAISS.from_documents(self.docs, self.embeddings)
 
     def createDocRetrievalChain(self):
         document_chain = create_stuff_documents_chain(self.llm, self.prompt)
