@@ -1,5 +1,3 @@
-import pywhatkit as pwk
+from getProjectDocument import get_project_document
 
-phone_number = "+918668959768"
-message = "Hello, this is a test message!"
-pwk.sendwhatmsg_instantly(phone_number, message)
+print(get_project_document(project_id="67e6fbe188de37f5a8a39096"))

@@ -15,4 +15,4 @@ class Allocator:
 
     def get_best_matches(self):
         print("🔍 Searching for best matches...")
-        return self.rag_pipeline.get_response()
+        return self.rag_pipeline.get_response().split(",")  # Assuming the response is a comma-separated string of IDs
