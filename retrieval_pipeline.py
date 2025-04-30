@@ -34,7 +34,6 @@ class RetrievalPipeline:
         # Search top 6 similar artists
         results = self.vstore.similarity_search_with_score(self.query_text, k=6)
 
-        # Extract scores and calculate mean
         scores = [score for _, score in results]
         mean_score = np.mean(scores)
         
