@@ -24,7 +24,7 @@ class RetrievalPipeline:
         # Set up embedding + Astra vector store using our custom embeddings
         self.embedding = CustomHuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
         self.vstore = AstraDBVectorStore(
-            collection_name="artist_vector",
+            collection_name="artists_vector",
             embedding=self.embedding,
             token=os.getenv("ASTRA_DB_APPLICATION_TOKEN"),
             api_endpoint=os.getenv("ASTRA_DB_API_ENDPOINT"),
