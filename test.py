@@ -1,3 +1,0 @@
-from getProjectDocument import get_project_document
-
-print(get_project_document(project_id="67e6fbe188de37f5a8a39096"))

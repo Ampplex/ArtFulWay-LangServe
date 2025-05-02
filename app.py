@@ -1,52 +1,68 @@
-from flask import Flask, jsonify, request
-from flask_cors import CORS  # Install with: pip install flask-cors
+from fastapi import FastAPI, Query, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from typing import List, Optional, Dict, Any
 from retrieval_pipeline import RetrievalPipeline
 import os
+from mangum import Mangum
+import sys
 
-app = Flask(__name__)
-# Configure CORS to allow all origins during development
-CORS(app, resources={r"/*": {"origins": ["http://localhost:5173", "http://localhost:8080"]}})
+print(sys.path)
 
-# deprecated
-# Route to handle artist matching
-# @app.route('/match_artists', methods=['GET']) 
-# def match_artists_handler():
-#     client_id = request.args.get('client_id')
-#     project_id = request.args.get('project_id')
+app = FastAPI(title="Artist Matching API")
 
-#     if not client_id:
-#         return jsonify({"error": "client_id is required"}), 400
+# Configure CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173", "http://localhost:8080"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-#     try:
-#         allocator = Allocator(client_id, project_id)
-#         matches = allocator.get_best_matches()
-#         print("Matches found:", matches)
-
-#         return jsonify({"artist_ids": matches}), 200
-#     except Exception as e:
-#         # Catch any potential errors from the Allocator
-#         return jsonify({"error": str(e)}), 500
-
-@app.route('/match_artists', methods=['GET']) 
-def match_artists_handler():
-    project_id = request.args.get('project_id')
-
+@app.get("/match_artists")
+async def match_artists_handler(project_id: Optional[str] = Query(None)):
+    """
+    Get matching artists for a project.
+    
+    Args:
+        project_id: The ID of the project
+    
+    Returns:
+        A list of artist IDs that match the project
+    """
     try:
         matches = RetrievalPipeline(project_id).get_response()
-
-        return jsonify({"artist_ids": matches}), 200
+        return {"artist_ids": matches}
     except Exception as e:
-        # Catch any potential errors from the Allocator
-        return jsonify({"error": str(e)}), 500
+        raise HTTPException(status_code=500, detail=str(e))
 
-@app.route('/assist', methods=['GET'])
-def assist():
-    project_id = request.args.get('project_id')
+@app.get("/assist")
+async def assist(project_id: Optional[str] = Query(None)):
+    """
+    Assist endpoint (implementation needed).
+    
+    Args:
+        project_id: The ID of the project
+    """
+    # Placeholder for implementation
+    
+    return {"message": "Assist functionality not yet implemented"}
 
-@app.route('/', methods=['GET'])
-def health_check():
-    return jsonify({"status": "healthy"}), 200
+@app.get("/")
+async def health_check():
+    """
+    Health check endpoint.
+    
+    Returns:
+        Status of the API
+    """
+    return {"status": "healthy"}
+
+# Lambda handler for AWS
+handler = Mangum(app)
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 8080))  # Use Render's PORT or default to 8000
-    app.run(host="0.0.0.0", port=port)
+    import uvicorn
+    port = int(os.environ.get("PORT", 8080))
+    uvicorn.run("main:app", host="0.0.0.0", port=port, reload=True)
