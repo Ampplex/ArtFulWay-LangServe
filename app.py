@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS  # Install with: pip install flask-cors
 from retrieval_pipeline import RetrievalPipeline
+import os
 
 app = Flask(__name__)
 # Configure CORS to allow all origins during development
@@ -47,4 +48,5 @@ def health_check():
     return jsonify({"status": "healthy"}), 200
 
 if __name__ == "__main__":
-    app.run(debug=True, host='0.0.0.0', port=5050)
+    port = int(os.environ.get("PORT", 8080))  # Use Render's PORT or default to 8000
+    app.run(host="0.0.0.0", port=port)
