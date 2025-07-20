@@ -13,5 +13,6 @@ Respond in:
 Title: ...
 Caption: ...
 """
+    
     state["caption_draft"] = llm.invoke(prompt).content
     return state
