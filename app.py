@@ -6,8 +6,10 @@ from retrieval_pipeline import RetrievalPipeline
 import os
 from mangum import Mangum
 import sys
+from schema import AdGenerationRequest
+# from tools.AdGeneration.graph_pipeline import build_graph, run_graph, refine_loop, postprocess_output
+from tools.AdGeneration.graph_pipeline import build_graph, run_graph, refine_loop, postprocess_output
 
-print(sys.path)
 
 app = FastAPI(title="Artist Matching API")
 
@@ -58,6 +60,44 @@ async def health_check():
         Status of the API
     """
     return {"status": "healthy"}
+
+@app.post("/ad_generation")
+async def ad_generation_handler(raw_data: AdGenerationRequest):
+    """
+    Generate ad content based on user input.
+    
+    Args:
+        raw_data: The data containing platform and product information
+    
+    Returns:
+        A dictionary with generated ad content
+    """
+
+    user_input = {
+            "platform": raw_data.platform,
+            "product": raw_data.product,
+            "tone": raw_data.tone if hasattr(raw_data, 'tone') else "informative",
+            "goal": raw_data.goal if hasattr(raw_data, 'goal') else "engagement",
+            "description": raw_data.description
+    }
+
+    # Initialize state
+    state = {
+        "user_input": user_input,
+        "refine_count": 0,
+    }
+
+    # Build and run the graph
+    graph = build_graph()
+    state = run_graph(graph, state)
+    state = refine_loop(state)
+    postprocess_output(state)
+
+    try:
+        final_state = run_graph(graph, state)
+        return JSONResponse(content=final_state)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 # Lambda handler for AWS
 handler = Mangum(app)

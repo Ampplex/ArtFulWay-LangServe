@@ -1,4 +1,4 @@
-from llm_init import llm
+from ..llm_init import llm
 
 def ad_caption_generator(state):
     ui = state["user_input"]

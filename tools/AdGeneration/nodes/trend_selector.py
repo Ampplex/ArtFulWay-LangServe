@@ -1,4 +1,4 @@
-from llm_init import llm
+from ..llm_init import llm
 
 def trend_selector(state):
     raw = "\n".join(state["search_snippets"])

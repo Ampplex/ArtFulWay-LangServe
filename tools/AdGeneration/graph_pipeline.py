@@ -5,12 +5,12 @@ from typing import TypedDict, Dict, Any
 from langgraph.graph import StateGraph
 from pydantic import BaseModel, Field, ValidationError
 
-from nodes.intent_validator import intent_validator
-from nodes.ad_caption_generator import ad_caption_generator
-from nodes.tavily_search import tavily_search
-from nodes.trend_selector import trend_selector
-from nodes.critique_refine import critique_refine
-from nodes.postprocessor import postprocessor
+from .nodes.intent_validator import intent_validator
+from .nodes.trend_selector import trend_selector
+from .nodes.tavily_search import tavily_search
+from .nodes.ad_caption_generator import ad_caption_generator
+from .nodes.critique_refine import critique_refine
+from .nodes.postprocessor import postprocessor
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -118,6 +118,7 @@ def postprocess_output(state: AdGenState) -> None:
         logger.error(f"Postprocessing failed: {e}")
         raise
 
+## Just for testing purposes
 def main() -> None:
     """Main function to build the graph and run the content generation pipeline."""
     graph = build_graph()
